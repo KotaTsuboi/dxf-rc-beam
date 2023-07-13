@@ -11,8 +11,7 @@ pub struct TomlInput {
     pub gap_between_rebar: f64,
     pub cover_depth: f64,
     pub num_rebar: NumRebar,
-    pub concrete_layer: String,
-    pub rebar_layer: String,
+    pub layer_name: LayerName,
 }
 
 #[derive(Deserialize)]
@@ -23,6 +22,12 @@ pub struct NumRebar {
     pub bottom_1: u32,
     pub bottom_2: u32,
     pub bottom_3: u32,
+}
+
+#[derive(Deserialize)]
+pub struct LayerName {
+    pub concrete: String,
+    pub rebar: String,
 }
 
 fn read_file(path: &str) -> Result<String, String> {

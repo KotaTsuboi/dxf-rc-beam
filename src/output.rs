@@ -8,7 +8,7 @@ use std::error::Error;
 
 fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
     let concrete_layer = Layer {
-        name: input.concrete_layer.clone(),
+        name: input.layer_name.concrete.clone(),
         color: Color::from_index(2),
         ..Default::default()
     };
@@ -16,7 +16,7 @@ fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Err
     drawing.add_layer(concrete_layer);
 
     let rebar_layer = Layer {
-        name: input.rebar_layer.clone(),
+        name: input.layer_name.rebar.clone(),
         color: Color::from_index(4),
         ..Default::default()
     };
@@ -43,7 +43,7 @@ fn write_concrete(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dy
         let x2 = coords[(i + 1) % 4].0;
         let y1 = coords[i % 4].1;
         let y2 = coords[(i + 1) % 4].1;
-        let layer = input.concrete_layer.clone();
+        let layer = input.layer_name.concrete.clone();
 
         write_line(drawing, x1, y1, x2, y2, &layer)?;
     }
@@ -165,7 +165,7 @@ fn write_rebars(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn 
         let x = coord.0;
         let y = coord.1;
         let r = input.rebar_diameter / 2.0;
-        let layer = &input.rebar_layer;
+        let layer = &input.layer_name.rebar;
         write_circle(drawing, x, y, r, layer)?;
         write_cross(drawing, x, y, r + 1.0, layer)?;
     }
@@ -206,7 +206,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
     let d = input.cover_depth;
     let r = input.rebar_diameter / 2.0;
     let g = input.gap_between_rebar;
-    let layer = &input.rebar_layer;
+    let layer = &input.layer_name.rebar;
 
     write_line(drawing, d + r, d, w - d - r, d, layer)?;
     write_line(drawing, d + r, h - d, w - d - r, h - d, layer)?;

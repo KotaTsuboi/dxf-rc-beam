@@ -1,10 +1,9 @@
-beam_height = 1700  # mm
-beam_width = 600    # mm
-rebar_diameter = 29 # mm
-gap_between_rebar = 80
+beam_height = 1700     # mm
+beam_width = 600       # mm
+
+rebar_diameter = 29    # mm
+gap_between_rebar = 80 # mm
 cover_depth = 120      # mm
-concrete_layer = "RC大梁"
-rebar_layer = "RC鉄筋"
 
 [num_rebar]
 top_1 = 5
@@ -13,3 +12,7 @@ top_3 = 0
 bottom_1 = 5
 bottom_2 = 4
 bottom_3 = 0
+
+[layer_name]
+concrete = "RC大梁"
+rebar = "RC鉄筋"
