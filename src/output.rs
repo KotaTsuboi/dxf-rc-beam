@@ -1,6 +1,6 @@
 use crate::input::TomlInput;
 use dxf::{
-    entities::{Circle, Entity, Line, Polyline, Vertex},
+    entities::{Circle, Entity, Line, Polyline},
     tables::Layer,
     Color, Drawing, Point,
 };
@@ -37,26 +37,16 @@ fn write_concrete(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dy
     let h = input.beam_height;
 
     let coords = vec![(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
-    for coord in coords {
-        let vertex = Vertex {
-            location: Point {
-                x: coord.0,
-                y: coord.1,
-                z: 0.0,
-            },
-            ..Default::default()
-        };
-        polyline.add_vertex(drawing, vertex);
+
+    for i in 0..4 {
+        let x1 = coords[i % 4].0;
+        let x2 = coords[(i + 1) % 4].0;
+        let y1 = coords[i % 4].1;
+        let y2 = coords[(i + 1) % 4].1;
+        let layer = input.concrete_layer.clone();
+
+        write_line(drawing, x1, y1, x2, y2, &layer)?;
     }
-
-    let mut polyline = Entity::new(dxf::entities::EntityType::Polyline(polyline));
-
-    let layer = input.concrete_layer.clone();
-    polyline.common.layer = layer;
-
-    write_line(drawing, 0.0, 0.0, w, h, &input.concrete_layer)?;
-
-    drawing.add_entity(polyline);
 
     Ok(())
 }
