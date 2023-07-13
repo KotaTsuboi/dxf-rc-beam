@@ -11,6 +11,8 @@ pub struct TomlInput {
     pub gap_between_rebar: f64,
     pub cover_depth: f64,
     pub num_rebar: NumRebar,
+    pub concrete_layer: String,
+    pub rebar_layer: String,
 }
 
 #[derive(Deserialize)]

@@ -1,16 +1,40 @@
 use crate::input::TomlInput;
 use dxf::{
     entities::{Circle, Entity, Line, Polyline, Vertex},
-    Drawing, Point,
+    tables::Layer,
+    Color, Drawing, Point,
 };
 use std::error::Error;
 
-pub fn write_rectangle(drawing: &mut Drawing, w: f64, h: f64) -> Result<(), Box<dyn Error>> {
+fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
+    let concrete_layer = Layer {
+        name: input.concrete_layer.clone(),
+        color: Color::from_index(2),
+        ..Default::default()
+    };
+
+    drawing.add_layer(concrete_layer);
+
+    let rebar_layer = Layer {
+        name: input.rebar_layer.clone(),
+        color: Color::from_index(4),
+        ..Default::default()
+    };
+
+    drawing.add_layer(rebar_layer);
+
+    Ok(())
+}
+
+fn write_concrete(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
     let mut polyline = Polyline {
         ..Default::default()
     };
 
     polyline.set_is_closed(true);
+
+    let w = input.beam_width;
+    let h = input.beam_height;
 
     let coords = vec![(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
     for coord in coords {
@@ -25,7 +49,12 @@ pub fn write_rectangle(drawing: &mut Drawing, w: f64, h: f64) -> Result<(), Box<
         polyline.add_vertex(drawing, vertex);
     }
 
-    let polyline = Entity::new(dxf::entities::EntityType::Polyline(polyline));
+    let mut polyline = Entity::new(dxf::entities::EntityType::Polyline(polyline));
+
+    let layer = input.concrete_layer.clone();
+    polyline.common.layer = layer;
+
+    write_line(drawing, 0.0, 0.0, w, h, &input.concrete_layer)?;
 
     drawing.add_entity(polyline);
 
@@ -89,27 +118,42 @@ fn get_rebar_coord(input: &TomlInput) -> Result<Vec<(f64, f64)>, Box<dyn Error>>
     Ok(result)
 }
 
-pub fn write_circle(drawing: &mut Drawing, x: f64, y: f64, r: f64) -> Result<(), Box<dyn Error>> {
+pub fn write_circle(
+    drawing: &mut Drawing,
+    x: f64,
+    y: f64,
+    r: f64,
+    layer: &str,
+) -> Result<(), Box<dyn Error>> {
     let circle = Circle {
         center: Point { x, y, z: 0.0 },
         radius: r,
         ..Default::default()
     };
 
-    let circle = Entity::new(dxf::entities::EntityType::Circle(circle));
+    let mut circle = Entity::new(dxf::entities::EntityType::Circle(circle));
+
+    circle.common.layer = layer.to_string();
 
     drawing.add_entity(circle);
 
     Ok(())
 }
 
-fn write_cross(drawing: &mut Drawing, x: f64, y: f64, r: f64) -> Result<(), Box<dyn Error>> {
+fn write_cross(
+    drawing: &mut Drawing,
+    x: f64,
+    y: f64,
+    r: f64,
+    layer: &str,
+) -> Result<(), Box<dyn Error>> {
     write_line(
         drawing,
         x - r / 2_f64.sqrt(),
         y + r / 2_f64.sqrt(),
         x + r / 2_f64.sqrt(),
         y - r / 2_f64.sqrt(),
+        layer,
     )?;
 
     write_line(
@@ -118,6 +162,7 @@ fn write_cross(drawing: &mut Drawing, x: f64, y: f64, r: f64) -> Result<(), Box<
         y - r / 2_f64.sqrt(),
         x + r / 2_f64.sqrt(),
         y + r / 2_f64.sqrt(),
+        layer,
     )?;
 
     Ok(())
@@ -130,8 +175,9 @@ fn write_rebars(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn 
         let x = coord.0;
         let y = coord.1;
         let r = input.rebar_diameter / 2.0;
-        write_circle(drawing, x, y, r)?;
-        write_cross(drawing, x, y, r + 1.0)?;
+        let layer = &input.rebar_layer;
+        write_circle(drawing, x, y, r, layer)?;
+        write_cross(drawing, x, y, r + 1.0, layer)?;
     }
 
     Ok(())
@@ -143,6 +189,7 @@ fn write_line(
     y1: f64,
     x2: f64,
     y2: f64,
+    layer: &str,
 ) -> Result<(), Box<dyn Error>> {
     let line = Line {
         p1: Point {
@@ -157,7 +204,8 @@ fn write_line(
         },
         ..Default::default()
     };
-    let line = Entity::new(dxf::entities::EntityType::Line(line));
+    let mut line = Entity::new(dxf::entities::EntityType::Line(line));
+    line.common.layer = layer.to_string();
     drawing.add_entity(line);
     Ok(())
 }
@@ -168,18 +216,19 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
     let d = input.cover_depth;
     let r = input.rebar_diameter / 2.0;
     let g = input.gap_between_rebar;
+    let layer = &input.rebar_layer;
 
-    write_line(drawing, d + r, d, w - d - r, d)?;
-    write_line(drawing, d + r, h - d, w - d - r, h - d)?;
-    write_line(drawing, d, d + r, d, h - d - r)?;
-    write_line(drawing, w - d, d + r, w - d, h - d - r)?;
+    write_line(drawing, d + r, d, w - d - r, d, layer)?;
+    write_line(drawing, d + r, h - d, w - d - r, h - d, layer)?;
+    write_line(drawing, d, d + r, d, h - d - r, layer)?;
+    write_line(drawing, w - d, d + r, w - d, h - d - r, layer)?;
 
     if input.num_rebar.bottom_2 > 0 {
-        write_line(drawing, d + r, d + g, w - d - r, d + g)?;
+        write_line(drawing, d + r, d + g, w - d - r, d + g, layer)?;
     }
 
     if input.num_rebar.bottom_3 > 0 {
-        write_line(drawing, d + r, d + 2.0 * g, w - d - r, d + 2.0 * g)?;
+        write_line(drawing, d + r, d + 2.0 * g, w - d - r, d + 2.0 * g, layer)?;
     }
 
     if input.num_rebar.top_2 > 0 {
@@ -189,6 +238,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
             h - d - 2.0 * r - g,
             w - d - r,
             h - d - 2.0 * r - g,
+            layer,
         )?;
     }
 
@@ -199,6 +249,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
             h - d - 2.0 * r - 2.0 * g,
             w - d - r,
             h - d - 2.0 * r - 2.0 * g,
+            layer,
         )?;
     }
 
@@ -208,9 +259,9 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
 pub fn write(input: TomlInput, output_file: &str) -> Result<(), Box<dyn Error>> {
     let mut drawing = Drawing::new();
 
-    let w = input.beam_width;
-    let h = input.beam_height;
-    write_rectangle(&mut drawing, w, h)?;
+    set_layer(&mut drawing, &input)?;
+
+    write_concrete(&mut drawing, &input)?;
 
     write_rebars(&mut drawing, &input)?;
 
