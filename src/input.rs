@@ -4,7 +4,7 @@ use std::io::Read;
 use std::{fs, io::BufReader};
 
 #[derive(Deserialize)]
-pub struct TomlInput {
+pub struct RcBeamDrawing {
     beam_height: f64,
     beam_width: f64,
     rebar_diameter: f64,
@@ -14,7 +14,7 @@ pub struct TomlInput {
     layer_name: Option<LayerName>,
 }
 
-impl TomlInput {
+impl RcBeamDrawing {
     pub fn beam_height(&self) -> f64 {
         self.beam_height
     }
@@ -91,11 +91,13 @@ pub struct LayerName {
 
 impl LayerName {
     pub fn concrete(&self) -> String {
-        self.concrete.clone().unwrap_or("RC大梁".to_string())
+        self.concrete
+            .clone()
+            .unwrap_or_else(|| "RC大梁".to_string())
     }
 
     pub fn rebar(&self) -> String {
-        self.rebar.clone().unwrap_or("RC鉄筋".to_string())
+        self.rebar.clone().unwrap_or_else(|| "RC鉄筋".to_string())
     }
 }
 
@@ -112,10 +114,10 @@ fn read_file(path: &str) -> Result<String, String> {
     Ok(file_content)
 }
 
-pub fn read_input(file_path: &str) -> Result<TomlInput, Box<dyn Error>> {
+pub fn read_input(file_path: &str) -> Result<RcBeamDrawing, Box<dyn Error>> {
     let s = read_file(file_path).expect("failed to read file");
 
-    let toml: Result<TomlInput, toml::de::Error> = toml::from_str(&s);
+    let toml: Result<RcBeamDrawing, toml::de::Error> = toml::from_str(&s);
 
     let toml = toml.expect("failed to parse toml");
 

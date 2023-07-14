@@ -1,4 +1,4 @@
-use crate::input::TomlInput;
+use crate::input::RcBeamDrawing;
 use dxf::{
     entities::{Circle, Entity, Line, Polyline},
     tables::Layer,
@@ -6,9 +6,9 @@ use dxf::{
 };
 use std::error::Error;
 
-fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
+fn set_layer(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
     let concrete_layer = Layer {
-        name: input.layer_name().concrete().clone(),
+        name: input.layer_name().concrete(),
         color: Color::from_index(2),
         ..Default::default()
     };
@@ -16,7 +16,7 @@ fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Err
     drawing.add_layer(concrete_layer);
 
     let rebar_layer = Layer {
-        name: input.layer_name().rebar().clone(),
+        name: input.layer_name().rebar(),
         color: Color::from_index(4),
         ..Default::default()
     };
@@ -26,7 +26,7 @@ fn set_layer(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Err
     Ok(())
 }
 
-fn write_concrete(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
+fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
     let mut polyline = Polyline {
         ..Default::default()
     };
@@ -51,7 +51,7 @@ fn write_concrete(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dy
     Ok(())
 }
 
-fn get_rebar_coord(input: &TomlInput) -> Result<Vec<(f64, f64)>, Box<dyn Error>> {
+fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dyn Error>> {
     let w = input.beam_width();
     let h = input.beam_height();
     let d = input.cover_depth();
@@ -158,7 +158,7 @@ fn write_cross(
     Ok(())
 }
 
-fn write_rebars(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
+fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
     let coords = get_rebar_coord(input)?;
 
     for coord in coords {
@@ -200,7 +200,7 @@ fn write_line(
     Ok(())
 }
 
-fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn Error>> {
+fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
     let w = input.beam_width();
     let h = input.beam_height();
     let d = input.cover_depth();
@@ -246,7 +246,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &TomlInput) -> Result<(), Box<dyn
     Ok(())
 }
 
-pub fn write(input: TomlInput, output_file: &str) -> Result<(), Box<dyn Error>> {
+pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<(), Box<dyn Error>> {
     let mut drawing = Drawing::new();
 
     set_layer(&mut drawing, &input)?;
