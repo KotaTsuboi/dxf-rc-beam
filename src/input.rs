@@ -5,13 +5,13 @@ use std::{fs, io::BufReader};
 
 #[derive(Deserialize)]
 pub struct TomlInput {
-    pub beam_height: f64,
-    pub beam_width: f64,
-    pub rebar_diameter: f64,
-    pub gap_between_rebar: Option<f64>,
-    pub cover_depth: Option<f64>,
-    pub num_rebar: NumRebar,
-    pub layer_name: Option<LayerName>,
+    beam_height: f64,
+    beam_width: f64,
+    rebar_diameter: f64,
+    gap_between_rebar: Option<f64>,
+    cover_depth: Option<f64>,
+    num_rebar: NumRebar,
+    layer_name: Option<LayerName>,
 }
 
 impl TomlInput {
@@ -36,25 +36,25 @@ impl TomlInput {
     }
 
     pub fn num_rebar(&self) -> NumRebar {
-        self.num_rebar
+        self.num_rebar.clone()
     }
 
     pub fn layer_name(&self) -> LayerName {
-        self.layer_name.unwrap_or(LayerName {
+        self.layer_name.clone().unwrap_or(LayerName {
             concrete: Some("RC大梁".to_string()),
             rebar: Some("RC鉄筋".to_string()),
         })
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct NumRebar {
-    pub top_1: Option<u32>,
-    pub top_2: Option<u32>,
-    pub top_3: Option<u32>,
-    pub bottom_1: Option<u32>,
-    pub bottom_2: Option<u32>,
-    pub bottom_3: Option<u32>,
+    top_1: Option<u32>,
+    top_2: Option<u32>,
+    top_3: Option<u32>,
+    bottom_1: Option<u32>,
+    bottom_2: Option<u32>,
+    bottom_3: Option<u32>,
 }
 
 impl NumRebar {
@@ -83,19 +83,19 @@ impl NumRebar {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct LayerName {
-    pub concrete: Option<String>,
-    pub rebar: Option<String>,
+    concrete: Option<String>,
+    rebar: Option<String>,
 }
 
 impl LayerName {
     pub fn concrete(&self) -> String {
-        self.concrete.unwrap_or("RC大梁".to_string())
+        self.concrete.clone().unwrap_or("RC大梁".to_string())
     }
 
     pub fn rebar(&self) -> String {
-        self.rebar.unwrap_or("RC鉄筋".to_string())
+        self.rebar.clone().unwrap_or("RC鉄筋".to_string())
     }
 }
 
