@@ -12,6 +12,7 @@ top_3 = 0
 bottom_1 = 5
 bottom_2 = 4
 bottom_3 = 0
+side_rebar_row = 3
 
 [layer_name]
 concrete = "RC大梁"

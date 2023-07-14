@@ -160,14 +160,67 @@ fn write_cross(
 
 fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
     let coords = get_rebar_coord(input)?;
+    let layer = &input.layer_name().rebar();
 
     for coord in coords {
         let x = coord.0;
         let y = coord.1;
         let r = input.rebar_diameter() / 2.0;
-        let layer = &input.layer_name().rebar();
         write_circle(drawing, x, y, r, layer)?;
         write_cross(drawing, x, y, r + 1.0, layer)?;
+    }
+
+    Ok(())
+}
+
+fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dyn Error>> {
+    let mut coords = Vec::new();
+
+    let n = input.num_rebar().side_rebar_row();
+
+    if n == 0 {
+        return Ok(coords);
+    }
+
+    let w = input.beam_width();
+    let h = input.beam_height();
+    let d = input.cover_depth();
+    let r = input.rebar_diameter();
+    let dy = (h - 2.0 * d - 2.0 * r) / (n + 1) as f64;
+
+    for i in 1..=n {
+        let xi = d + 10.0;
+        let xj = w - d - 10.0;
+        let y = d + r + dy * i as f64;
+
+        coords.push((xi, y));
+        coords.push((xj, y));
+    }
+
+    Ok(coords)
+}
+
+fn write_side_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+    let coords = get_side_rebar_coord(input)?;
+    let layer = &input.layer_name().rebar();
+
+    for coord in &coords {
+        let x = coord.0;
+        let y = coord.1;
+        let r = 10.0;
+        write_cross(drawing, x, y, r, layer)?;
+    }
+
+    let mut i = 0;
+    while i < coords.len() {
+        let x1 = coords[i].0 - 10.0;
+        let y1 = coords[i].1 - 10.0;
+        let x2 = coords[i + 1].0 + 10.0;
+        let y2 = coords[i + 1].1 - 10.0;
+
+        write_line(drawing, x1, y1, x2, y2, layer)?;
+
+        i += 2;
     }
 
     Ok(())
@@ -254,6 +307,8 @@ pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<(), Box<dyn Erro
     write_concrete(&mut drawing, &input)?;
 
     write_rebars(&mut drawing, &input)?;
+
+    write_side_rebar(&mut drawing, &input)?;
 
     write_stirrup(&mut drawing, &input)?;
 

@@ -55,6 +55,7 @@ pub struct NumRebar {
     bottom_1: Option<u32>,
     bottom_2: Option<u32>,
     bottom_3: Option<u32>,
+    side_rebar_row: Option<u32>,
 }
 
 impl NumRebar {
@@ -80,6 +81,10 @@ impl NumRebar {
 
     pub fn bottom_3(&self) -> u32 {
         self.bottom_3.unwrap_or(0)
+    }
+
+    pub fn side_rebar_row(&self) -> u32 {
+        self.side_rebar_row.unwrap_or(0)
     }
 }
 
