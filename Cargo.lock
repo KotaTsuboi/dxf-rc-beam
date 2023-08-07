@@ -281,17 +281,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dxf-rc-beam"
-version = "0.1.0"
-dependencies = [
- "clap",
- "dxf",
- "serde",
- "serde_derive",
- "toml",
-]
-
-[[package]]
 name = "either"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -725,6 +714,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96426c9936fd7a0124915f9185ea1d20aa9445cc9821142f0a73bc9207a2e186"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "stdr-rcbeam"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "dxf",
+ "serde",
+ "serde_derive",
+ "toml",
 ]
 
 [[package]]
