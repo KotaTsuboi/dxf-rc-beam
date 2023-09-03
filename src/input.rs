@@ -5,8 +5,8 @@ use std::{fs, io::BufReader};
 
 #[derive(Deserialize)]
 pub struct RcBeamDrawing {
-    pub beam_height: f64,
     pub beam_width: f64,
+    pub beam_height: f64,
     pub rebar_diameter: f64,
     pub gap_between_rebar: f64,
     pub cover_depth: f64,

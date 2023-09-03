@@ -1,5 +1,5 @@
-beam_height = 1700     # mm
 beam_width = 600       # mm
+beam_height = 1700     # mm
 
 rebar_diameter = 29    # mm
 gap_between_rebar = 80 # mm
