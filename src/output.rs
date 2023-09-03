@@ -214,9 +214,9 @@ fn write_side_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), 
     let mut i = 0;
     while i < coords.len() {
         let x1 = coords[i].0 - 10.0;
-        let y1 = coords[i].1 - 10.0;
+        let y1 = coords[i].1 + 10.0;
         let x2 = coords[i + 1].0 + 10.0;
-        let y2 = coords[i + 1].1 - 10.0;
+        let y2 = coords[i + 1].1 + 10.0;
 
         write_line(drawing, x1, y1, x2, y2, layer)?;
 
