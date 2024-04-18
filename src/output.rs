@@ -1,12 +1,12 @@
 use crate::input::RcBeamDrawing;
+use anyhow::Result;
 use dxf::{
     entities::{Circle, Entity, Line, Polyline},
     tables::Layer,
     Color, Drawing, Point,
 };
-use std::error::Error;
 
-fn set_layer(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+fn set_layer(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let concrete_layer = Layer {
         name: input.layer_name.concrete.clone(),
         color: Color::from_index(2),
@@ -26,7 +26,7 @@ fn set_layer(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn
     Ok(())
 }
 
-fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let mut polyline = Polyline {
         ..Default::default()
     };
@@ -51,7 +51,7 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Bo
     Ok(())
 }
 
-fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dyn Error>> {
+fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let w = input.beam_width;
     let h = input.beam_height;
     let d = input.cover_depth;
@@ -108,13 +108,7 @@ fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dyn Err
     Ok(result)
 }
 
-pub fn write_circle(
-    drawing: &mut Drawing,
-    x: f64,
-    y: f64,
-    r: f64,
-    layer: &str,
-) -> Result<(), Box<dyn Error>> {
+pub fn write_circle(drawing: &mut Drawing, x: f64, y: f64, r: f64, layer: &str) -> Result<()> {
     let circle = Circle {
         center: Point { x, y, z: 0.0 },
         radius: r,
@@ -130,13 +124,7 @@ pub fn write_circle(
     Ok(())
 }
 
-fn write_cross(
-    drawing: &mut Drawing,
-    x: f64,
-    y: f64,
-    r: f64,
-    layer: &str,
-) -> Result<(), Box<dyn Error>> {
+fn write_cross(drawing: &mut Drawing, x: f64, y: f64, r: f64, layer: &str) -> Result<()> {
     write_line(
         drawing,
         x - r / 2_f64.sqrt(),
@@ -158,7 +146,7 @@ fn write_cross(
     Ok(())
 }
 
-fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let coords = get_rebar_coord(input)?;
     let layer = &input.layer_name.rebar;
 
@@ -173,7 +161,7 @@ fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<
     Ok(())
 }
 
-fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dyn Error>> {
+fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let mut coords = Vec::new();
 
     let n = input.num_rebar.side_rebar_row;
@@ -200,7 +188,7 @@ fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>, Box<dy
     Ok(coords)
 }
 
-fn write_side_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+fn write_side_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let coords = get_side_rebar_coord(input)?;
     let layer = &input.layer_name.rebar;
 
@@ -233,7 +221,7 @@ fn write_line(
     x2: f64,
     y2: f64,
     layer: &str,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<()> {
     let line = Line {
         p1: Point {
             x: x1,
@@ -253,7 +241,7 @@ fn write_line(
     Ok(())
 }
 
-fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box<dyn Error>> {
+fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let w = input.beam_width;
     let h = input.beam_height;
     let d = input.cover_depth;
@@ -299,7 +287,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<(), Box
     Ok(())
 }
 
-pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<(), Box<dyn Error>> {
+pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<()> {
     let mut drawing = Drawing::new();
 
     set_layer(&mut drawing, &input)?;

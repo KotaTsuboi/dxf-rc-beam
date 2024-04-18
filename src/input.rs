@@ -1,5 +1,5 @@
+use anyhow::Result;
 use serde_derive::Deserialize;
-use std::error::Error;
 use std::io::Read;
 use std::{fs, io::BufReader};
 
@@ -61,7 +61,7 @@ fn read_file(path: &str) -> Result<String, String> {
     Ok(file_content)
 }
 
-pub fn read_input(file_path: &str) -> Result<RcBeamDrawing, Box<dyn Error>> {
+pub fn read_input(file_path: &str) -> Result<RcBeamDrawing> {
     let s = read_file(file_path).expect("failed to read file");
 
     let toml: Result<RcBeamDrawing, toml::de::Error> = toml::from_str(&s);
