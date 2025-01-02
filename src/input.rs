@@ -5,15 +5,16 @@ use std::{fs, io::BufReader};
 
 #[derive(Deserialize)]
 pub struct RcBeamDrawing {
+    pub beam_name: String,
     pub dimension: Dimension,
     pub num_rebar: NumRebar,
     #[serde(default)]
     pub layer_name: LayerName,
+    pub layout: Layout,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct Dimension {
-    pub beam_name: String,
     pub beam_width: f64,
     pub beam_height: f64,
     pub rebar_diameter: f64,
@@ -43,6 +44,12 @@ pub struct NumRebar {
 pub struct LayerName {
     pub concrete: String,
     pub rebar: String,
+    pub text: String,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct Layout {
+    pub text_height: f64,
 }
 
 impl Default for LayerName {
@@ -50,6 +57,7 @@ impl Default for LayerName {
         LayerName {
             concrete: "RC大梁".to_string(),
             rebar: "RC鉄筋".to_string(),
+            text: "注釈".to_string(),
         }
     }
 }

@@ -288,10 +288,17 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     Ok(())
 }
 
-fn write_text(drawing: &mut Drawing, x: f64, y: f64, text_height: f64, value: &str) -> Result<()> {
+fn write_text(
+    drawing: &mut Drawing,
+    x: f64,
+    y: f64,
+    text_height: f64,
+    value: &str,
+    layer: &str,
+) -> Result<()> {
     let location = Point { x, y, z: 0.0 };
 
-    let entity = dxf::entities::Text {
+    let text = dxf::entities::Text {
         location,
         text_height,
         value: value.to_string(),
@@ -299,13 +306,58 @@ fn write_text(drawing: &mut Drawing, x: f64, y: f64, text_height: f64, value: &s
         vertical_text_justification: VerticalTextJustification::Middle,
         ..Default::default()
     };
-    let entity = Entity::new(dxf::entities::EntityType::Text(entity));
+    let mut entity = Entity::new(dxf::entities::EntityType::Text(text));
+    entity.common.layer = layer.to_string();
     drawing.add_entity(entity);
     Ok(())
 }
 
 fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
-    write_text(drawing, 0.0, 1000.0, 100.0, &input.dimension.beam_name)?;
+    let text_height = input.layout.text_height;
+    let base = -1000.0;
+    write_text(
+        drawing,
+        0.0,
+        base,
+        text_height,
+        &input.beam_name,
+        &input.layer_name.text,
+    )?;
+    write_text(
+        drawing,
+        0.0,
+        base - 2.0 * text_height,
+        text_height,
+        &format!(
+            "{}x{}",
+            input.dimension.beam_width, input.dimension.beam_height
+        ),
+        &input.layer_name.text,
+    )?;
+    write_text(
+        drawing,
+        0.0,
+        base - 4.0 * text_height,
+        text_height,
+        &format!(
+            "{}-D{}",
+            input.num_rebar.top_1 + input.num_rebar.top_2 + input.num_rebar.top_3,
+            input.dimension.rebar_diameter
+        ),
+        &input.layer_name.text,
+    )?;
+    write_text(
+        drawing,
+        0.0,
+        base - 6.0 * text_height,
+        text_height,
+        &format!(
+            "{}-D{}",
+            input.num_rebar.bottom_1 + input.num_rebar.bottom_2 + input.num_rebar.bottom_3,
+            input.dimension.rebar_diameter
+        ),
+        &input.layer_name.text,
+    )?;
     Ok(())
 }
 

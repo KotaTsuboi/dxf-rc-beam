@@ -1,5 +1,6 @@
-[dimension]
 beam_name = "FG1"
+
+[dimension]
 beam_width = 600       # mm
 beam_height = 1700     # mm
 
@@ -19,3 +20,7 @@ side_rebar_row = 3
 [layer_name]
 concrete = "RC大梁"
 rebar = "RC鉄筋"
+text = "注釈"
+
+[layout]
+text_height = 100
