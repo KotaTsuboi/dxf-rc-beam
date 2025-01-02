@@ -49,8 +49,8 @@ pub struct Stirrup {
 
 #[derive(Deserialize, Clone)]
 pub struct WebRebar {
-    #[serde(default)]
     pub diameter: f64,
+    #[serde(default)]
     pub num_row: u32,
 }
 

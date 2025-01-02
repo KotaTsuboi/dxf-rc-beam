@@ -24,6 +24,14 @@ fn set_layer(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
 
     drawing.add_layer(rebar_layer);
 
+    let rebar_layer = Layer {
+        name: input.layer_name.text.clone(),
+        color: Color::from_index(3),
+        ..Default::default()
+    };
+
+    drawing.add_layer(rebar_layer);
+
     Ok(())
 }
 
@@ -37,7 +45,7 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let w = input.dimension.beam_width;
     let h = input.dimension.beam_height;
 
-    let coords = vec![(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
+    let coords = [(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
 
     for i in 0..4 {
         let x1 = coords[i % 4].0;
