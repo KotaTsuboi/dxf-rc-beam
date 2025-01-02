@@ -1,21 +1,26 @@
 beam_name = "FG1"
 
 [dimension]
-beam_width = 600       # mm
-beam_height = 1700     # mm
+beam_width = 600   # mm
+beam_height = 1700 # mm
 
 rebar_diameter = 29    # mm
 gap_between_rebar = 80 # mm
-cover_depth = 70      # mm
+cover_depth = 70       # mm
 
-[num_rebar]
+[main_rebar]
 top_1 = 5
 top_2 = 2
 top_3 = 0
 bottom_1 = 5
 bottom_2 = 4
 bottom_3 = 0
-side_rebar_row = 3
+web_rebar_row = 3
+
+[stirrup]
+num = 2
+diameter = 13
+pitch = 200
 
 [layer_name]
 concrete = "RC大梁"

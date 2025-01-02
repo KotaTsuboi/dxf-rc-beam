@@ -64,15 +64,15 @@ fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
 
     let mut result = Vec::new();
 
-    if input.num_rebar.bottom_1 < 2 {
+    if input.main_rebar.bottom_1 < 2 {
         panic!("The number of bottom rebar is less than 2.");
     }
-    let dx = (w - 2.0 * d - 2.0 * r) / (input.num_rebar.bottom_1 - 1) as f64;
+    let dx = (w - 2.0 * d - 2.0 * r) / (input.main_rebar.bottom_1 - 1) as f64;
 
     for n in [
-        input.num_rebar.bottom_1,
-        input.num_rebar.bottom_2,
-        input.num_rebar.bottom_3,
+        input.main_rebar.bottom_1,
+        input.main_rebar.bottom_2,
+        input.main_rebar.bottom_3,
     ] {
         for i in 0..n {
             let base = if i % 2 == 0 { d + r } else { w - d - r };
@@ -86,15 +86,15 @@ fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
 
     let mut y = h - d - r;
 
-    if input.num_rebar.top_1 < 2 {
+    if input.main_rebar.top_1 < 2 {
         panic!("The number of top rebar is less than 2.");
     }
-    let dx = (w - 2.0 * d - 2.0 * r) / (input.num_rebar.top_1 - 1) as f64;
+    let dx = (w - 2.0 * d - 2.0 * r) / (input.main_rebar.top_1 - 1) as f64;
 
     for n in [
-        input.num_rebar.top_1,
-        input.num_rebar.top_2,
-        input.num_rebar.top_3,
+        input.main_rebar.top_1,
+        input.main_rebar.top_2,
+        input.main_rebar.top_3,
     ] {
         for i in 0..n {
             let base = if i % 2 == 0 { d + r } else { w - d - r };
@@ -147,7 +147,7 @@ fn write_cross(drawing: &mut Drawing, x: f64, y: f64, r: f64, layer: &str) -> Re
     Ok(())
 }
 
-fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
+fn write_main_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let coords = get_rebar_coord(input)?;
     let layer = &input.layer_name.rebar;
 
@@ -162,10 +162,10 @@ fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     Ok(())
 }
 
-fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
+fn get_web_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let mut coords = Vec::new();
 
-    let n = input.num_rebar.side_rebar_row;
+    let n = input.main_rebar.web_rebar_row;
 
     if n == 0 {
         return Ok(coords);
@@ -189,8 +189,8 @@ fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     Ok(coords)
 }
 
-fn write_side_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
-    let coords = get_side_rebar_coord(input)?;
+fn write_web_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
+    let coords = get_web_rebar_coord(input)?;
     let layer = &input.layer_name.rebar;
 
     for coord in &coords {
@@ -255,15 +255,15 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     write_line(drawing, d, d + r, d, h - d - r, layer)?;
     write_line(drawing, w - d, d + r, w - d, h - d - r, layer)?;
 
-    if input.num_rebar.bottom_2 > 0 {
+    if input.main_rebar.bottom_2 > 0 {
         write_line(drawing, d + r, d + g, w - d - r, d + g, layer)?;
     }
 
-    if input.num_rebar.bottom_3 > 0 {
+    if input.main_rebar.bottom_3 > 0 {
         write_line(drawing, d + r, d + 2.0 * g, w - d - r, d + 2.0 * g, layer)?;
     }
 
-    if input.num_rebar.top_2 > 0 {
+    if input.main_rebar.top_2 > 0 {
         write_line(
             drawing,
             d + r,
@@ -274,7 +274,7 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         )?;
     }
 
-    if input.num_rebar.top_3 > 0 {
+    if input.main_rebar.top_3 > 0 {
         write_line(
             drawing,
             d + r,
@@ -315,6 +315,7 @@ fn write_text(
 fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let text_height = input.layout.text_height;
     let base = -1000.0;
+
     write_text(
         drawing,
         0.0,
@@ -323,6 +324,7 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         &input.beam_name,
         &input.layer_name.text,
     )?;
+
     write_text(
         drawing,
         0.0,
@@ -334,6 +336,7 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         ),
         &input.layer_name.text,
     )?;
+
     write_text(
         drawing,
         0.0,
@@ -341,11 +344,12 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         text_height,
         &format!(
             "{}-D{}",
-            input.num_rebar.top_1 + input.num_rebar.top_2 + input.num_rebar.top_3,
+            input.main_rebar.top_1 + input.main_rebar.top_2 + input.main_rebar.top_3,
             input.dimension.rebar_diameter
         ),
         &input.layer_name.text,
     )?;
+
     write_text(
         drawing,
         0.0,
@@ -353,11 +357,24 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         text_height,
         &format!(
             "{}-D{}",
-            input.num_rebar.bottom_1 + input.num_rebar.bottom_2 + input.num_rebar.bottom_3,
+            input.main_rebar.bottom_1 + input.main_rebar.bottom_2 + input.main_rebar.bottom_3,
             input.dimension.rebar_diameter
         ),
         &input.layer_name.text,
     )?;
+
+    write_text(
+        drawing,
+        0.0,
+        base - 8.0 * text_height,
+        text_height,
+        &format!(
+            "{}-D{}@{}",
+            input.stirrup.num, input.stirrup.diameter, input.stirrup.pitch
+        ),
+        &input.layer_name.text,
+    )?;
+
     Ok(())
 }
 
@@ -368,9 +385,9 @@ pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<()> {
 
     write_concrete(&mut drawing, &input)?;
 
-    write_rebars(&mut drawing, &input)?;
+    write_main_rebar(&mut drawing, &input)?;
 
-    write_side_rebar(&mut drawing, &input)?;
+    write_web_rebar(&mut drawing, &input)?;
 
     write_stirrup(&mut drawing, &input)?;
 

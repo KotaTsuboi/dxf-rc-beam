@@ -7,7 +7,8 @@ use std::{fs, io::BufReader};
 pub struct RcBeamDrawing {
     pub beam_name: String,
     pub dimension: Dimension,
-    pub num_rebar: NumRebar,
+    pub main_rebar: MainRebar,
+    pub stirrup: Stirrup,
     #[serde(default)]
     pub layer_name: LayerName,
     pub layout: Layout,
@@ -23,7 +24,7 @@ pub struct Dimension {
 }
 
 #[derive(Deserialize, Clone)]
-pub struct NumRebar {
+pub struct MainRebar {
     #[serde(default)]
     pub top_1: u32,
     #[serde(default)]
@@ -37,7 +38,14 @@ pub struct NumRebar {
     #[serde(default)]
     pub bottom_3: u32,
     #[serde(default)]
-    pub side_rebar_row: u32,
+    pub web_rebar_row: u32,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct Stirrup {
+    pub num: u32,
+    pub diameter: f64,
+    pub pitch: f64,
 }
 
 #[derive(Deserialize, Clone)]
