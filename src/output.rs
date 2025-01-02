@@ -56,11 +56,11 @@ fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let w = input.dimension.beam_width;
     let h = input.dimension.beam_height;
     let d = input.dimension.cover_depth;
-    let r = input.dimension.rebar_diameter / 2.0;
+    let r = input.main_rebar.diameter / 2.0;
 
     let mut y = d + r;
 
-    let dy = input.dimension.gap_between_rebar;
+    let dy = input.main_rebar.gap;
 
     let mut result = Vec::new();
 
@@ -154,7 +154,7 @@ fn write_main_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> 
     for coord in coords {
         let x = coord.0;
         let y = coord.1;
-        let r = input.dimension.rebar_diameter / 2.0;
+        let r = input.main_rebar.diameter / 2.0;
         write_circle(drawing, x, y, r, layer)?;
         write_cross(drawing, x, y, r + 1.0, layer)?;
     }
@@ -165,7 +165,7 @@ fn write_main_rebar(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> 
 fn get_web_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let mut coords = Vec::new();
 
-    let n = input.main_rebar.web_rebar_row;
+    let n = input.web_rebar.num_row;
 
     if n == 0 {
         return Ok(coords);
@@ -174,7 +174,7 @@ fn get_web_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
     let w = input.dimension.beam_width;
     let h = input.dimension.beam_height;
     let d = input.dimension.cover_depth;
-    let r = input.dimension.rebar_diameter;
+    let r = input.main_rebar.diameter;
     let dy = (h - 2.0 * d - 2.0 * r) / (n + 1) as f64;
 
     for i in 1..=n {
@@ -246,8 +246,8 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let w = input.dimension.beam_width;
     let h = input.dimension.beam_height;
     let d = input.dimension.cover_depth;
-    let r = input.dimension.rebar_diameter / 2.0;
-    let g = input.dimension.gap_between_rebar;
+    let r = input.main_rebar.diameter / 2.0;
+    let g = input.main_rebar.gap;
     let layer = &input.layer_name.rebar;
 
     write_line(drawing, d + r, d, w - d - r, d, layer)?;
@@ -345,7 +345,7 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         &format!(
             "{}-D{}",
             input.main_rebar.top_1 + input.main_rebar.top_2 + input.main_rebar.top_3,
-            input.dimension.rebar_diameter
+            input.main_rebar.diameter
         ),
         &input.layer_name.text,
     )?;
@@ -358,7 +358,7 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         &format!(
             "{}-D{}",
             input.main_rebar.bottom_1 + input.main_rebar.bottom_2 + input.main_rebar.bottom_3,
-            input.dimension.rebar_diameter
+            input.main_rebar.diameter
         ),
         &input.layer_name.text,
     )?;
@@ -371,6 +371,19 @@ fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
         &format!(
             "{}-D{}@{}",
             input.stirrup.num, input.stirrup.diameter, input.stirrup.pitch
+        ),
+        &input.layer_name.text,
+    )?;
+
+    write_text(
+        drawing,
+        0.0,
+        base - 10.0 * text_height,
+        text_height,
+        &format!(
+            "{}-D{}",
+            2 * input.web_rebar.num_row,
+            input.web_rebar.diameter,
         ),
         &input.layer_name.text,
     )?;

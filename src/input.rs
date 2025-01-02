@@ -9,6 +9,7 @@ pub struct RcBeamDrawing {
     pub dimension: Dimension,
     pub main_rebar: MainRebar,
     pub stirrup: Stirrup,
+    pub web_rebar: WebRebar,
     #[serde(default)]
     pub layer_name: LayerName,
     pub layout: Layout,
@@ -18,13 +19,13 @@ pub struct RcBeamDrawing {
 pub struct Dimension {
     pub beam_width: f64,
     pub beam_height: f64,
-    pub rebar_diameter: f64,
-    pub gap_between_rebar: f64,
     pub cover_depth: f64,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct MainRebar {
+    pub diameter: f64,
+    pub gap: f64,
     #[serde(default)]
     pub top_1: u32,
     #[serde(default)]
@@ -37,8 +38,6 @@ pub struct MainRebar {
     pub bottom_2: u32,
     #[serde(default)]
     pub bottom_3: u32,
-    #[serde(default)]
-    pub web_rebar_row: u32,
 }
 
 #[derive(Deserialize, Clone)]
@@ -46,6 +45,13 @@ pub struct Stirrup {
     pub num: u32,
     pub diameter: f64,
     pub pitch: f64,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct WebRebar {
+    #[serde(default)]
+    pub diameter: f64,
+    pub num_row: u32,
 }
 
 #[derive(Deserialize, Clone)]
