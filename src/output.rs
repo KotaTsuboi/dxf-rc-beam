@@ -2,6 +2,7 @@ use crate::input::RcBeamDrawing;
 use anyhow::Result;
 use dxf::{
     entities::{Circle, Entity, Line, Polyline},
+    enums::{HorizontalTextJustification, VerticalTextJustification},
     tables::Layer,
     Color, Drawing, Point,
 };
@@ -33,8 +34,8 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
 
     polyline.set_is_closed(true);
 
-    let w = input.beam_width;
-    let h = input.beam_height;
+    let w = input.dimension.beam_width;
+    let h = input.dimension.beam_height;
 
     let coords = vec![(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
 
@@ -52,14 +53,14 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
 }
 
 fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
-    let w = input.beam_width;
-    let h = input.beam_height;
-    let d = input.cover_depth;
-    let r = input.rebar_diameter / 2.0;
+    let w = input.dimension.beam_width;
+    let h = input.dimension.beam_height;
+    let d = input.dimension.cover_depth;
+    let r = input.dimension.rebar_diameter / 2.0;
 
     let mut y = d + r;
 
-    let dy = input.gap_between_rebar;
+    let dy = input.dimension.gap_between_rebar;
 
     let mut result = Vec::new();
 
@@ -153,7 +154,7 @@ fn write_rebars(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     for coord in coords {
         let x = coord.0;
         let y = coord.1;
-        let r = input.rebar_diameter / 2.0;
+        let r = input.dimension.rebar_diameter / 2.0;
         write_circle(drawing, x, y, r, layer)?;
         write_cross(drawing, x, y, r + 1.0, layer)?;
     }
@@ -170,10 +171,10 @@ fn get_side_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
         return Ok(coords);
     }
 
-    let w = input.beam_width;
-    let h = input.beam_height;
-    let d = input.cover_depth;
-    let r = input.rebar_diameter;
+    let w = input.dimension.beam_width;
+    let h = input.dimension.beam_height;
+    let d = input.dimension.cover_depth;
+    let r = input.dimension.rebar_diameter;
     let dy = (h - 2.0 * d - 2.0 * r) / (n + 1) as f64;
 
     for i in 1..=n {
@@ -242,11 +243,11 @@ fn write_line(
 }
 
 fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
-    let w = input.beam_width;
-    let h = input.beam_height;
-    let d = input.cover_depth;
-    let r = input.rebar_diameter / 2.0;
-    let g = input.gap_between_rebar;
+    let w = input.dimension.beam_width;
+    let h = input.dimension.beam_height;
+    let d = input.dimension.cover_depth;
+    let r = input.dimension.rebar_diameter / 2.0;
+    let g = input.dimension.gap_between_rebar;
     let layer = &input.layer_name.rebar;
 
     write_line(drawing, d + r, d, w - d - r, d, layer)?;
@@ -287,6 +288,27 @@ fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     Ok(())
 }
 
+fn write_text(drawing: &mut Drawing, x: f64, y: f64, text_height: f64, value: &str) -> Result<()> {
+    let location = Point { x, y, z: 0.0 };
+
+    let entity = dxf::entities::Text {
+        location,
+        text_height,
+        value: value.to_string(),
+        horizontal_text_justification: HorizontalTextJustification::Middle,
+        vertical_text_justification: VerticalTextJustification::Middle,
+        ..Default::default()
+    };
+    let entity = Entity::new(dxf::entities::EntityType::Text(entity));
+    drawing.add_entity(entity);
+    Ok(())
+}
+
+fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
+    write_text(drawing, 0.0, 1000.0, 100.0, &input.dimension.beam_name)?;
+    Ok(())
+}
+
 pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<()> {
     let mut drawing = Drawing::new();
 
@@ -299,6 +321,8 @@ pub fn write(input: RcBeamDrawing, output_file: &str) -> Result<()> {
     write_side_rebar(&mut drawing, &input)?;
 
     write_stirrup(&mut drawing, &input)?;
+
+    write_texts(&mut drawing, &input)?;
 
     drawing.save_file(output_file)?;
 
