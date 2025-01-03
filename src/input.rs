@@ -6,7 +6,7 @@ use std::{fs, io::BufReader};
 #[derive(Deserialize)]
 pub struct RcBeamDrawing {
     pub beam_name: String,
-    pub dimension: Dimension,
+    pub concrete: Concrete,
     pub main_rebar: MainRebar,
     pub stirrup: Stirrup,
     pub web_rebar: WebRebar,
@@ -16,7 +16,7 @@ pub struct RcBeamDrawing {
 }
 
 #[derive(Deserialize, Clone)]
-pub struct Dimension {
+pub struct Concrete {
     pub beam_width: f64,
     pub beam_height: f64,
     pub cover_depth: f64,

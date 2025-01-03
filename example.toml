@@ -1,6 +1,6 @@
 beam_name = "FG1"
 
-[dimension]
+[concrete]
 beam_width = 600   # mm
 beam_height = 1700 # mm
 cover_depth = 70       # mm

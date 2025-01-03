@@ -42,8 +42,8 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
 
     polyline.set_is_closed(true);
 
-    let w = input.dimension.beam_width;
-    let h = input.dimension.beam_height;
+    let w = input.concrete.beam_width;
+    let h = input.concrete.beam_height;
 
     let coords = [(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
 
@@ -61,9 +61,9 @@ fn write_concrete(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
 }
 
 fn get_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
-    let w = input.dimension.beam_width;
-    let h = input.dimension.beam_height;
-    let d = input.dimension.cover_depth;
+    let w = input.concrete.beam_width;
+    let h = input.concrete.beam_height;
+    let d = input.concrete.cover_depth;
     let r = input.main_rebar.diameter / 2.0;
 
     let mut y = d + r;
@@ -179,9 +179,9 @@ fn get_web_rebar_coord(input: &RcBeamDrawing) -> Result<Vec<(f64, f64)>> {
         return Ok(coords);
     }
 
-    let w = input.dimension.beam_width;
-    let h = input.dimension.beam_height;
-    let d = input.dimension.cover_depth;
+    let w = input.concrete.beam_width;
+    let h = input.concrete.beam_height;
+    let d = input.concrete.cover_depth;
     let r = input.main_rebar.diameter;
     let dy = (h - 2.0 * d - 2.0 * r) / (n + 1) as f64;
 
@@ -251,9 +251,9 @@ fn write_line(
 }
 
 fn write_stirrup(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
-    let w = input.dimension.beam_width;
-    let h = input.dimension.beam_height;
-    let d = input.dimension.cover_depth;
+    let w = input.concrete.beam_width;
+    let h = input.concrete.beam_height;
+    let d = input.concrete.cover_depth;
     let r = input.main_rebar.diameter / 2.0;
     let g = input.main_rebar.gap;
     let layer = &input.layer_name.rebar;
@@ -322,79 +322,41 @@ fn write_text(
 
 fn write_texts(drawing: &mut Drawing, input: &RcBeamDrawing) -> Result<()> {
     let text_height = input.layout.text_height;
-    let base = -1000.0;
+    let x = 0.0;
+    let mut y = -1000.0;
+    let dy = 2.0 * text_height;
 
-    write_text(
-        drawing,
-        0.0,
-        base,
-        text_height,
-        &input.beam_name,
-        &input.layer_name.text,
-    )?;
-
-    write_text(
-        drawing,
-        0.0,
-        base - 2.0 * text_height,
-        text_height,
-        &format!(
+    let values = [
+        input.beam_name.clone(),
+        format!(
             "{}x{}",
-            input.dimension.beam_width, input.dimension.beam_height
+            input.concrete.beam_width, input.concrete.beam_height
         ),
-        &input.layer_name.text,
-    )?;
-
-    write_text(
-        drawing,
-        0.0,
-        base - 4.0 * text_height,
-        text_height,
-        &format!(
+        format!(
             "{}-D{}",
             input.main_rebar.top_1 + input.main_rebar.top_2 + input.main_rebar.top_3,
             input.main_rebar.diameter
         ),
-        &input.layer_name.text,
-    )?;
-
-    write_text(
-        drawing,
-        0.0,
-        base - 6.0 * text_height,
-        text_height,
-        &format!(
+        format!(
             "{}-D{}",
             input.main_rebar.bottom_1 + input.main_rebar.bottom_2 + input.main_rebar.bottom_3,
             input.main_rebar.diameter
         ),
-        &input.layer_name.text,
-    )?;
-
-    write_text(
-        drawing,
-        0.0,
-        base - 8.0 * text_height,
-        text_height,
-        &format!(
+        format!(
             "{}-D{}@{}",
             input.stirrup.num, input.stirrup.diameter, input.stirrup.pitch
         ),
-        &input.layer_name.text,
-    )?;
-
-    write_text(
-        drawing,
-        0.0,
-        base - 10.0 * text_height,
-        text_height,
-        &format!(
+        format!(
             "{}-D{}",
             2 * input.web_rebar.num_row,
             input.web_rebar.diameter,
         ),
-        &input.layer_name.text,
-    )?;
+    ];
+
+    for value in values {
+        write_text(drawing, x, y, text_height, &value, &input.layer_name.text)?;
+        y -= dy;
+    }
 
     Ok(())
 }
