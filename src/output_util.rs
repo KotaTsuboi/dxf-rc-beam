@@ -81,11 +81,12 @@ pub fn write_text(
     let location = Point { x, y, z: 0.0 };
 
     let text = dxf::entities::Text {
-        location,
+        location: location.clone(),
+        second_alignment_point: location,
         text_height,
         value: value.to_string(),
         horizontal_text_justification: HorizontalTextJustification::Middle,
-        vertical_text_justification: VerticalTextJustification::Middle,
+        vertical_text_justification: VerticalTextJustification::Baseline,
         ..Default::default()
     };
     let mut entity = Entity::new(dxf::entities::EntityType::Text(text));
